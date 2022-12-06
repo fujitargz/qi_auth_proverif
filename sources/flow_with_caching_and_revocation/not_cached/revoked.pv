@@ -37,17 +37,17 @@ const CHALLENGE_AUTH: msgType.
 (* イベント *)
 event successAuth(spkey).
 event sendResp(sskey).
-event revocated(spkey).
-event notRevocated(spkey).
+event revoked(spkey).
+event notRevoked(spkey).
 
 (* クエリ *)
 query attacker(sskPTx).
 query key: spkey; event(successAuth(key)).
-query key: sskey; event(successAuth(spk(key))) ==> (event(sendResp(key)) && event(notRevocated(spk(key)))).
-query key: sskey; inj-event(successAuth(spk(key))) ==> (inj-event(sendResp(key)) && inj-event(notRevocated(spk(key)))).
+query key: sskey; event(successAuth(spk(key))) ==> (event(sendResp(key)) && event(notRevoked(spk(key)))).
+query key: sskey; inj-event(successAuth(spk(key))) ==> (inj-event(sendResp(key)) && inj-event(notRevoked(spk(key)))).
 
 (* PRx のプロセス *)
-let PRx(spkCA: spkey, cachedDigest: bitstring, cachedKey: spkey, revocatedCert: bitstring) =
+let PRx(spkCA: spkey, cachedDigest: bitstring, cachedKey: spkey, revokedCert: bitstring) =
     (* GET_DIGESTS *)
     out(c, (VERSION, GET_DIGESTS));
     in(c, (v_dig: version, msg_dig: msgType, digest_dig: bitstring));
@@ -61,9 +61,9 @@ let PRx(spkCA: spkey, cachedDigest: bitstring, cachedKey: spkey, revocatedCert: 
     if v_cert = VERSION then
     if msg_cert = CERTIFICATE then
     if checksign((ID_cert, spk_cert), cert_cert, spkCA) then
-    if hash(cert_cert) = hash(revocatedCert) then
-    event revocated(spk_cert) else
-    event notRevocated(spk_cert);
+    if hash(cert_cert) = hash(revokedCert) then
+    event revoked(spk_cert) else
+    event notRevoked(spk_cert);
     (* CHALLENGE *)
     new nonce: bitstring;
     out(c, (VERSION, CHALLENGE, nonce));

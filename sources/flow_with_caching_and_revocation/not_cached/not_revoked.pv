@@ -37,24 +37,22 @@ const CHALLENGE_AUTH: msgType.
 (* イベント *)
 event successAuth(spkey).
 event sendResp(sskey).
-event revocated(spkey).
-event notRevocated(spkey).
+event revoked(spkey).
+event notRevoked(spkey).
 
 (* クエリ *)
 query attacker(sskPTx).
-query key: spkey; event(successAuth(key)).
-query key: sskey; event(successAuth(spk(key))) ==> (event(notRevocated(spk(key))) && event(sendResp(key))).
-query key: sskey; inj-event(successAuth(spk(key))) ==> (inj-event(notRevocated(spk(key))) && inj-event(sendResp(key))).
+query key: sskey; event(successAuth(spk(key))) ==> (event(sendResp(key)) && event(notRevoked(spk(key)))).
+query key: sskey; inj-event(successAuth(spk(key))) ==> (inj-event(sendResp(key)) && inj-event(notRevoked(spk(key)))).
 
 (* PRx のプロセス *)
-let PRx(spkCA: spkey, cachedDigest: bitstring, cachedKey: spkey, revocatedCert: bitstring) =
-    (* CHALLENGE *)
-    new nonce: bitstring;
-    out(c, (VERSION, CHALLENGE, nonce));
-    in(c, (v_chalAuth: version, msg_chalAuth: msgType, hLSB_chalAuth: bitstring, sig: bitstring));
-    if v_chalAuth = VERSION then
-    if msg_chalAuth = CHALLENGE_AUTH then
-    if hLSB_chalAuth <> LSB(cachedDigest) then
+let PRx(spkCA: spkey, cachedDigest: bitstring, cachedKey: spkey, revokedCert: bitstring) =
+    (* GET_DIGESTS *)
+    out(c, (VERSION, GET_DIGESTS));
+    in(c, (v_dig: version, msg_dig: msgType, digest_dig: bitstring));
+    if v_dig = VERSION then
+    if msg_dig = DIGESTS then
+    if digest_dig <> cachedDigest then
     (* GET_CERTIFICATE *)
     out(c, (VERSION, GET_CERTIFICATE));
     (* 証明書検証 *)
@@ -62,28 +60,40 @@ let PRx(spkCA: spkey, cachedDigest: bitstring, cachedKey: spkey, revocatedCert: 
     if v_cert = VERSION then
     if msg_cert = CERTIFICATE then
     if checksign((ID_cert, spk_cert), cert_cert, spkCA) then
-    if hash(cert_cert) = hash(revocatedCert) then
-    event revocated(spk_cert) else
-    event notRevocated(spk_cert);
-    if checksign((hash(cert_cert), VERSION, CHALLENGE, nonce, v_chalAuth, msg_chalAuth, hLSB_chalAuth), sig, spk_cert) then
+    if hash(cert_cert) = hash(revokedCert) then
+    event revoked(spk_cert) else
+    event notRevoked(spk_cert);
+    (* CHALLENGE *)
+    new nonce: bitstring;
+    out(c, (VERSION, CHALLENGE, nonce));
+    (* 署名検証 *)
+    in(c, (v_chalAuth: version, msg_chalAuth: msgType, hLSB_chalAuth: bitstring, sig_chalAuth: bitstring));
+    if v_chalAuth = VERSION then
+    if msg_chalAuth = CHALLENGE_AUTH then
+    if checksign((digest_dig, VERSION, CHALLENGE, nonce, v_chalAuth, msg_chalAuth, hLSB_chalAuth), sig_chalAuth, spk_cert) then
     event successAuth(spk_cert).
 
 (* PTx のプロセス *)
 let PTx(IDPTx: ID, spkPTx: spkey, sskPTx: sskey, cert: bitstring) =
-    (* CHALLENGE_AUTH *)
-    in(c, (v_chal: version, msg_chal: msgType, nonce_chal: bitstring));
-    if v_chal = VERSION then
-    if msg_chal = CHALLENGE then
+    (* DIGESTS *)
+    in(c, (v_getDig: version, msg_getDig: msgType));
+    if v_getDig = VERSION then
+    if msg_getDig = GET_DIGESTS then
     let h = hash(cert) in
-    let hLSB = LSB(h) in
-    let sig = sign((h, v_chal, msg_chal, nonce_chal, VERSION, CHALLENGE_AUTH, hLSB), sskPTx) in
-    event sendResp(sskPTx);
-    out(c, (VERSION, CHALLENGE_AUTH, hLSB, sig));
+    out(c, (VERSION, DIGESTS, h));
     (* CERTIFICATE *)
     in(c, (v_getCert: version, msg_getCert: msgType));
     if v_getCert = VERSION then
     if msg_getCert = GET_CERTIFICATE then
-    out(c, (VERSION, CERTIFICATE, IDPTx, spkPTx, cert)).
+    out(c, (VERSION, CERTIFICATE, IDPTx, spkPTx, cert));
+    (* CHALLENGE_AUTH *)
+    in(c, (v_chal: version, msg_chal: msgType, nonce_chal: bitstring));
+    if v_chal = VERSION then
+    if msg_chal = CHALLENGE then
+    let hLSB = LSB(h) in
+    let sig = sign((h, v_chal, msg_chal, nonce_chal, VERSION, CHALLENGE_AUTH, hLSB), sskPTx) in
+    event sendResp(sskPTx);
+    out(c, (VERSION, CHALLENGE_AUTH, hLSB, sig)).
 
 process
     (* PTx の鍵ペア生成 *)
@@ -96,4 +106,4 @@ process
     new dummyCert: bitstring;
     new dummyKey: spkey;
     (* 実行 *)
-    ((!PRx(spkCA, dummyCert, dummyKey, productUnitCert)) | (!PTx(IDPTx, spkPTx, sskPTx, productUnitCert)))
+    (!PRx(spkCA, dummyCert, dummyKey, dummyCert) | (!PTx(IDPTx, spkPTx, sskPTx, productUnitCert)))

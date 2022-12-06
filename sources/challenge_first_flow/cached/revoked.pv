@@ -37,7 +37,7 @@ const CHALLENGE_AUTH: msgType.
 (* イベント *)
 event successAuth(spkey).
 event sendResp(sskey).
-event revocated(spkey).
+event revoked(spkey).
 
 (* クエリ *)
 query attacker(sskPTx).
@@ -46,7 +46,7 @@ query key: sskey; event(successAuth(spk(key))) ==> event(sendResp(key)).
 query key: sskey; inj-event(successAuth(spk(key))) ==> inj-event(sendResp(key)).
 
 (* PRx のプロセス *)
-let PRx(spkCA: spkey, cachedDigest: bitstring, cachedKey: spkey, revocatedCert: bitstring) =
+let PRx(spkCA: spkey, cachedDigest: bitstring, cachedKey: spkey, revokedCert: bitstring) =
     (* CHALLENGE *)
     new nonce: bitstring;
     out(c, (VERSION, CHALLENGE, nonce));
@@ -55,8 +55,8 @@ let PRx(spkCA: spkey, cachedDigest: bitstring, cachedKey: spkey, revocatedCert: 
     if msg_chalAuth = CHALLENGE_AUTH then
     if hLSB_chalAuth = LSB(cachedDigest) then
     if checksign((cachedDigest, VERSION, CHALLENGE, nonce, v_chalAuth, msg_chalAuth, hLSB_chalAuth), sig, cachedKey) then
-    if cachedDigest = hash(revocatedCert) then
-    event revocated(cachedKey) else
+    if cachedDigest = hash(revokedCert) then
+    event revoked(cachedKey) else
     event successAuth(cachedKey).
 
 (* PTx のプロセス *)

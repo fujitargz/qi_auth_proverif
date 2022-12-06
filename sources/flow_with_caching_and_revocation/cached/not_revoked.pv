@@ -37,34 +37,47 @@ const CHALLENGE_AUTH: msgType.
 (* イベント *)
 event successAuth(spkey).
 event sendResp(sskey).
-event revocated(spkey).
+event revoked(spkey).
+event notRevoked(spkey).
 
 (* クエリ *)
 query attacker(sskPTx).
-query key: sskey; event(successAuth(spk(key))) ==> event(sendResp(key)).
-query key: sskey; inj-event(successAuth(spk(key))) ==> inj-event(sendResp(key)).
+query key: sskey; event(successAuth(spk(key))) ==> event(sendResp(key)) && event(notRevoked(spk(key))).
+query key: sskey; inj-event(successAuth(spk(key))) ==> (inj-event(sendResp(key)) && inj-event(notRevoked(spk(key)))).
 
 (* PRx のプロセス *)
-let PRx(spkCA: spkey, cachedDigest: bitstring, cachedKey: spkey, revocatedCert: bitstring) =
+let PRx(spkCA: spkey, cachedDigest: bitstring, cachedKey: spkey, revokedCert: bitstring) =
+    (* GET_DIGESTS *)
+    out(c, (VERSION, GET_DIGESTS));
+    in(c, (v_dig: version, msg_dig: msgType, digest_dig: bitstring));
+    if v_dig = VERSION then
+    if msg_dig = DIGESTS then
+    if digest_dig = cachedDigest then
+    if digest_dig = hash(revokedCert) then
+    event revoked(cachedKey) else
+    event notRevoked(cachedKey);
     (* CHALLENGE *)
     new nonce: bitstring;
     out(c, (VERSION, CHALLENGE, nonce));
-    in(c, (v_chalAuth: version, msg_chalAuth: msgType, hLSB_chalAuth: bitstring, sig: bitstring));
+    (* 署名検証 *)
+    in(c, (v_chalAuth: version, msg_chalAuth: msgType, hLSB_chalAuth: bitstring, sig_chalAuth: bitstring));
     if v_chalAuth = VERSION then
     if msg_chalAuth = CHALLENGE_AUTH then
-    if hLSB_chalAuth = LSB(cachedDigest) then
-    if checksign((cachedDigest, VERSION, CHALLENGE, nonce, v_chalAuth, msg_chalAuth, hLSB_chalAuth), sig, cachedKey) then
-    if cachedDigest = hash(revocatedCert) then
-    event revocated(cachedKey) else
+    if checksign((digest_dig, VERSION, CHALLENGE, nonce, v_chalAuth, msg_chalAuth, hLSB_chalAuth), sig_chalAuth, cachedKey) then
     event successAuth(cachedKey).
 
 (* PTx のプロセス *)
 let PTx(IDPTx: ID, spkPTx: spkey, sskPTx: sskey, cert: bitstring) =
+    (* DIGESTS *)
+    in(c, (v_getDig: version, msg_getDig: msgType));
+    if v_getDig = VERSION then
+    if msg_getDig = GET_DIGESTS then
+    let h = hash(cert) in
+    out(c, (VERSION, DIGESTS, h));
     (* CHALLENGE_AUTH *)
     in(c, (v_chal: version, msg_chal: msgType, nonce_chal: bitstring));
     if v_chal = VERSION then
     if msg_chal = CHALLENGE then
-    let h = hash(cert) in
     let hLSB = LSB(h) in
     let sig = sign((h, v_chal, msg_chal, nonce_chal, VERSION, CHALLENGE_AUTH, hLSB), sskPTx) in
     event sendResp(sskPTx);
@@ -80,4 +93,4 @@ process
     let productUnitCert = sign((IDPTx, spkPTx), sskCA) in
     new dummyCert: bitstring;
     (* 実行 *)
-    ((!PRx(spkCA, hash(productUnitCert), spkPTx, dummyCert)) | (!PTx(IDPTx, spkPTx, sskPTx, productUnitCert)))
+    (!PRx(spkCA, hash(productUnitCert), spkPTx, dummyCert) | (!PTx(IDPTx, spkPTx, sskPTx, productUnitCert)))
