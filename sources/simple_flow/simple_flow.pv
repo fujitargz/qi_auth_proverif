@@ -1,0 +1,92 @@
+(* デジタル署名 *)
+type sskey.
+type spkey.
+
+fun spk(sskey): spkey.
+fun sign(bitstring, sskey): bitstring.
+
+reduc forall m: bitstring, k: sskey; checksign(m, sign(m, k), spk(k)) = true.
+
+(* ハッシュ関数 *)
+fun hash(bitstring): bitstring.
+
+(* LSB (Least Significant Byte) を取り出す関数 *)
+fun LSB(bitstring): bitstring.
+
+(* 通信路 *)
+free c: channel.
+
+(* PTx *)
+type ID.
+free IDPTx: ID.
+free sskPTx: sskey [private].
+
+(* protocol version *)
+type version.
+const VERSION: version.
+
+(* message type *)
+type msgType.
+const GET_DIGESTS: msgType.
+const GET_CERTIFICATE: msgType.
+const CHALLENGE: msgType.
+const DIGESTS: msgType.
+const CERTIFICATE: msgType.
+const CHALLENGE_AUTH: msgType.
+
+(* イベント *)
+event successAuth(ID, spkey).
+event sendResp(ID, sskey).
+
+
+(* クエリ *)
+query attacker(sskPTx).
+query id: ID, key: sskey; event(successAuth(id, spk(key))) ==> event(sendResp(id, key)).
+query id: ID, key: sskey; inj-event(successAuth(id, spk(key))) ==> inj-event(sendResp(id, key)).
+
+(* PRx のプロセス *)
+let PRx(spkCA: spkey) =
+    (* GET_CERTIFICATE *)
+    out(c, (VERSION, GET_CERTIFICATE));
+    (* 証明書検証 *)
+    in(c, (v_cert: version, msg_cert: msgType, ID_cert: ID, spk_cert: spkey, cert_cert: bitstring));
+    if v_cert = VERSION then
+    if msg_cert = CERTIFICATE then
+    if checksign((ID_cert, spk_cert), cert_cert, spkCA) then
+    (* CHALLENGE *)
+    new nonce: bitstring;
+    out(c, (VERSION, CHALLENGE, nonce));
+    (* 署名検証 *)
+    in(c, (v_chalAuth: version, msg_chalAuth: msgType, hLSB_chalAuth: bitstring, sig_chalAuth: bitstring));
+    if v_chalAuth = VERSION then
+    if msg_chalAuth = CHALLENGE_AUTH then
+    if checksign((hash(cert_cert), VERSION, CHALLENGE, nonce, v_chalAuth, msg_chalAuth, hLSB_chalAuth), sig_chalAuth, spk_cert) then
+    event successAuth(ID_cert, spk_cert).
+
+(* PTx のプロセス *)
+let PTx(IDPTx: ID, spkPTx: spkey, sskPTx: sskey, cert: bitstring) =
+    (* CERTIFICATE *)
+    in(c, (v_getCert: version, msg_getCert: msgType));
+    if v_getCert = VERSION then
+    if msg_getCert = GET_CERTIFICATE then
+    out(c, (VERSION, CERTIFICATE, IDPTx, spkPTx, cert));
+    (* CHALLENGE_AUTH *)
+    in(c, (v_chal: version, msg_chal: msgType, nonce_chal: bitstring));
+    if v_chal = VERSION then
+    if msg_chal = CHALLENGE then
+    let h = hash(cert) in
+    let hLSB = LSB(h) in
+    let sig = sign((h, v_chal, msg_chal, nonce_chal, VERSION, CHALLENGE_AUTH, hLSB), sskPTx) in
+    event sendResp(IDPTx, sskPTx);
+    out(c, (VERSION, CHALLENGE_AUTH, hLSB, sig)).
+
+process
+    (* PTx の鍵ペア生成 *)
+    let spkPTx = spk(sskPTx) in out(c, spkPTx);
+    (* CA の鍵ペア生成 *)
+    new sskCA: sskey;
+    let spkCA = spk(sskCA) in out(c, spkCA);
+    (* PTx の証明書作成 *)
+    let productUnitCert = sign((IDPTx, spkPTx), sskCA) in
+    (* 実行 *)
+    ((!PRx(spkCA)) | (!PTx(IDPTx, spkPTx, sskPTx, productUnitCert)))

@@ -1,0 +1,107 @@
+Process 0 (that is, the initial process):
+{1}let spkPTx: spkey = spk(sskPTx) in
+{2}out(c, spkPTx);
+{3}new sskCA: sskey;
+{4}let spkCA: spkey = spk(sskCA) in
+{5}out(c, spkCA);
+{6}let productUnitCert: bitstring = sign((IDPTx,spkPTx),sskCA) in
+{7}new dummyCert: bitstring;
+(
+    {8}!
+    {9}let cachedDigest: bitstring = hash(productUnitCert) in
+    {10}let revocatedCert: bitstring = dummyCert in
+    {11}new nonce: bitstring;
+    {12}out(c, (VERSION,CHALLENGE,nonce));
+    {13}in(c, (v_chalAuth: version,msg_chalAuth: msgType,hLSB_chalAuth: bitstring,sig: bitstring));
+    {14}if (v_chalAuth = VERSION) then
+    {15}if (msg_chalAuth = CHALLENGE_AUTH) then
+    {16}if (hLSB_chalAuth = LSB(cachedDigest)) then
+    {17}if checksign((cachedDigest,VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig,spkPTx) then
+    {18}if (cachedDigest = hash(revocatedCert)) then
+        {19}event revocated(spkPTx)
+    else
+        {20}event successAuth(spkPTx)
+) | (
+    {21}!
+    {22}let IDPTx_1: ID = IDPTx in
+    {23}let sskPTx_1: sskey = sskPTx in
+    {24}in(c, (v_chal: version,msg_chal: msgType,nonce_chal: bitstring));
+    {25}if (v_chal = VERSION) then
+    {26}if (msg_chal = CHALLENGE) then
+    {27}let h: bitstring = hash(productUnitCert) in
+    {28}let hLSB: bitstring = LSB(h) in
+    {29}let sig_1: bitstring = sign((h,v_chal,msg_chal,nonce_chal,VERSION,CHALLENGE_AUTH,hLSB),sskPTx_1) in
+    {30}event sendResp(sskPTx_1);
+    {31}out(c, (VERSION,CHALLENGE_AUTH,hLSB,sig_1))
+)
+
+--  Process 1 (that is, process 0, with let moved downwards):
+{1}let spkPTx: spkey = spk(sskPTx) in
+{2}out(c, spkPTx);
+{3}new sskCA: sskey;
+{4}let spkCA: spkey = spk(sskCA) in
+{5}out(c, spkCA);
+{7}new dummyCert: bitstring;
+{6}let productUnitCert: bitstring = sign((IDPTx,spkPTx),sskCA) in
+(
+    {8}!
+    {11}new nonce: bitstring;
+    {12}out(c, (VERSION,CHALLENGE,nonce));
+    {13}in(c, (v_chalAuth: version,msg_chalAuth: msgType,hLSB_chalAuth: bitstring,sig: bitstring));
+    {14}if (v_chalAuth = VERSION) then
+    {15}if (msg_chalAuth = CHALLENGE_AUTH) then
+    {9}let cachedDigest: bitstring = hash(productUnitCert) in
+    {16}if (hLSB_chalAuth = LSB(cachedDigest)) then
+    {17}if checksign((cachedDigest,VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig,spkPTx) then
+    {10}let revocatedCert: bitstring = dummyCert in
+    {18}if (cachedDigest = hash(revocatedCert)) then
+        {19}event revocated(spkPTx)
+    else
+        {20}event successAuth(spkPTx)
+) | (
+    {21}!
+    {24}in(c, (v_chal: version,msg_chal: msgType,nonce_chal: bitstring));
+    {25}if (v_chal = VERSION) then
+    {26}if (msg_chal = CHALLENGE) then
+    {23}let sskPTx_1: sskey = sskPTx in
+    {30}event sendResp(sskPTx_1);
+    {27}let h: bitstring = hash(productUnitCert) in
+    {28}let hLSB: bitstring = LSB(h) in
+    {29}let sig_1: bitstring = sign((h,v_chal,msg_chal,nonce_chal,VERSION,CHALLENGE_AUTH,hLSB),sskPTx_1) in
+    {31}out(c, (VERSION,CHALLENGE_AUTH,hLSB,sig_1))
+)
+
+-- Query not attacker(sskPTx[]) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query not attacker(sskPTx[])
+RESULT not attacker(sskPTx[]) is true.
+-- Query event(successAuth(spk(key))) ==> event(sendResp(key)) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query event(successAuth(spk(key))) ==> event(sendResp(key))
+goal reachable: begin(sendResp(sskPTx[])) -> end(successAuth(spk(sskPTx[])))
+RESULT event(successAuth(spk(key))) ==> event(sendResp(key)) is true.
+-- Query inj-event(successAuth(spk(key))) ==> inj-event(sendResp(key)) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query inj-event(successAuth(spk(key))) ==> inj-event(sendResp(key))
+goal reachable: begin(sendResp(sskPTx[]),@occ30_1) -> end(@occ20_1,successAuth(spk(sskPTx[])))
+The hypothesis occurs strictly before the conclusion.
+Abbreviations:
+nonce_1 = nonce[!1 = @sid]
+@occ20_1 = @occ20[sig = sign((hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])),VERSION,CHALLENGE,nonce_1,VERSION,CHALLENGE_AUTH,LSB(hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])))),sskPTx[]),hLSB_chalAuth = LSB(hash(sign((IDPTx[],spk(sskPTx[])),sskCA[]))),msg_chalAuth = CHALLENGE_AUTH,v_chalAuth = VERSION,!1 = @sid]
+@occ30_1 = @occ30[nonce_chal = nonce_1,msg_chal = CHALLENGE,v_chal = VERSION,!1 = @sid_1]
+RESULT inj-event(successAuth(spk(key))) ==> inj-event(sendResp(key)) is true.
+
+--------------------------------------------------------------
+Verification summary:
+
+Query not attacker(sskPTx[]) is true.
+
+Query event(successAuth(spk(key))) ==> event(sendResp(key)) is true.
+
+Query inj-event(successAuth(spk(key))) ==> inj-event(sendResp(key)) is true.
+
+--------------------------------------------------------------
+

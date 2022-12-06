@@ -1,0 +1,145 @@
+Process 0 (that is, the initial process):
+{1}let spkPTx: spkey = spk(sskPTx) in
+{2}out(c, spkPTx);
+{3}new sskCA: sskey;
+{4}let spkCA: spkey = spk(sskCA) in
+{5}out(c, spkCA);
+{6}let productUnitCert: bitstring = sign((IDPTx,spkPTx),sskCA) in
+{7}new dummyCert: bitstring;
+{8}new dummyKey: spkey;
+(
+    {9}!
+    {10}let cachedDigest: bitstring = dummyCert in
+    {11}let cachedKey: spkey = dummyKey in
+    {12}out(c, (VERSION,GET_DIGESTS));
+    {13}in(c, (v_dig: version,msg_dig: msgType,digest_dig: bitstring));
+    {14}if (v_dig = VERSION) then
+    {15}if (msg_dig = DIGESTS) then
+    {16}if (digest_dig ≠ cachedDigest) then
+    {17}out(c, (VERSION,GET_CERTIFICATE));
+    {18}in(c, (v_cert: version,msg_cert: msgType,ID_cert: ID,spk_cert: spkey,cert_cert: bitstring));
+    {19}if (v_cert = VERSION) then
+    {20}if (msg_cert = CERTIFICATE) then
+    {21}if checksign((ID_cert,spk_cert),cert_cert,spkCA) then
+    {22}if (hash(cert_cert) = hash(productUnitCert)) then
+        {23}event revocated(spk_cert)
+    else
+        {24}event notRevocated(spk_cert);
+        {25}new nonce: bitstring;
+        {26}out(c, (VERSION,CHALLENGE,nonce));
+        {27}in(c, (v_chalAuth: version,msg_chalAuth: msgType,hLSB_chalAuth: bitstring,sig_chalAuth: bitstring));
+        {28}if (v_chalAuth = VERSION) then
+        {29}if (msg_chalAuth = CHALLENGE_AUTH) then
+        {30}if checksign((digest_dig,VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig_chalAuth,spk_cert) then
+        {31}event successAuth(spk_cert)
+) | (
+    {32}!
+    {33}let IDPTx_1: ID = IDPTx in
+    {34}let sskPTx_1: sskey = sskPTx in
+    {35}in(c, (v_getDig: version,msg_getDig: msgType));
+    {36}if (v_getDig = VERSION) then
+    {37}if (msg_getDig = GET_DIGESTS) then
+    {38}let h: bitstring = hash(productUnitCert) in
+    {39}out(c, (VERSION,DIGESTS,h));
+    {40}in(c, (v_getCert: version,msg_getCert: msgType));
+    {41}if (v_getCert = VERSION) then
+    {42}if (msg_getCert = GET_CERTIFICATE) then
+    {43}out(c, (VERSION,CERTIFICATE,IDPTx_1,spkPTx,productUnitCert));
+    {44}in(c, (v_chal: version,msg_chal: msgType,nonce_chal: bitstring));
+    {45}if (v_chal = VERSION) then
+    {46}if (msg_chal = CHALLENGE) then
+    {47}let hLSB: bitstring = LSB(h) in
+    {48}let sig: bitstring = sign((h,v_chal,msg_chal,nonce_chal,VERSION,CHALLENGE_AUTH,hLSB),sskPTx_1) in
+    {49}event sendResp(sskPTx_1);
+    {50}out(c, (VERSION,CHALLENGE_AUTH,hLSB,sig))
+)
+
+--  Process 1 (that is, process 0, with let moved downwards):
+{1}let spkPTx: spkey = spk(sskPTx) in
+{2}out(c, spkPTx);
+{3}new sskCA: sskey;
+{4}let spkCA: spkey = spk(sskCA) in
+{5}out(c, spkCA);
+{7}new dummyCert: bitstring;
+{8}new dummyKey: spkey;
+{6}let productUnitCert: bitstring = sign((IDPTx,spkPTx),sskCA) in
+(
+    {9}!
+    {12}out(c, (VERSION,GET_DIGESTS));
+    {13}in(c, (v_dig: version,msg_dig: msgType,digest_dig: bitstring));
+    {14}if (v_dig = VERSION) then
+    {15}if (msg_dig = DIGESTS) then
+    {10}let cachedDigest: bitstring = dummyCert in
+    {16}if (digest_dig ≠ cachedDigest) then
+    {17}out(c, (VERSION,GET_CERTIFICATE));
+    {18}in(c, (v_cert: version,msg_cert: msgType,ID_cert: ID,spk_cert: spkey,cert_cert: bitstring));
+    {19}if (v_cert = VERSION) then
+    {20}if (msg_cert = CERTIFICATE) then
+    {21}if checksign((ID_cert,spk_cert),cert_cert,spkCA) then
+    {22}if (hash(cert_cert) = hash(productUnitCert)) then
+        {23}event revocated(spk_cert)
+    else
+        {24}event notRevocated(spk_cert);
+        {25}new nonce: bitstring;
+        {26}out(c, (VERSION,CHALLENGE,nonce));
+        {27}in(c, (v_chalAuth: version,msg_chalAuth: msgType,hLSB_chalAuth: bitstring,sig_chalAuth: bitstring));
+        {28}if (v_chalAuth = VERSION) then
+        {29}if (msg_chalAuth = CHALLENGE_AUTH) then
+        {30}if checksign((digest_dig,VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig_chalAuth,spk_cert) then
+        {31}event successAuth(spk_cert)
+) | (
+    {32}!
+    {35}in(c, (v_getDig: version,msg_getDig: msgType));
+    {36}if (v_getDig = VERSION) then
+    {37}if (msg_getDig = GET_DIGESTS) then
+    {38}let h: bitstring = hash(productUnitCert) in
+    {39}out(c, (VERSION,DIGESTS,h));
+    {40}in(c, (v_getCert: version,msg_getCert: msgType));
+    {41}if (v_getCert = VERSION) then
+    {42}if (msg_getCert = GET_CERTIFICATE) then
+    {33}let IDPTx_1: ID = IDPTx in
+    {43}out(c, (VERSION,CERTIFICATE,IDPTx_1,spkPTx,productUnitCert));
+    {44}in(c, (v_chal: version,msg_chal: msgType,nonce_chal: bitstring));
+    {45}if (v_chal = VERSION) then
+    {46}if (msg_chal = CHALLENGE) then
+    {34}let sskPTx_1: sskey = sskPTx in
+    {49}event sendResp(sskPTx_1);
+    {47}let hLSB: bitstring = LSB(h) in
+    {48}let sig: bitstring = sign((h,v_chal,msg_chal,nonce_chal,VERSION,CHALLENGE_AUTH,hLSB),sskPTx_1) in
+    {50}out(c, (VERSION,CHALLENGE_AUTH,hLSB,sig))
+)
+
+-- Query not attacker(sskPTx[]) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query not attacker(sskPTx[])
+RESULT not attacker(sskPTx[]) is true.
+-- Query not event(successAuth(key)) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query not event(successAuth(key))
+RESULT not event(successAuth(key)) is true.
+-- Query event(successAuth(spk(key))) ==> event(sendResp(key)) && event(notRevocated(spk(key))) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query event(successAuth(spk(key))) ==> event(sendResp(key)) && event(notRevocated(spk(key)))
+RESULT event(successAuth(spk(key))) ==> event(sendResp(key)) && event(notRevocated(spk(key))) is true.
+-- Query inj-event(successAuth(spk(key))) ==> inj-event(sendResp(key)) && inj-event(notRevocated(spk(key))) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query inj-event(successAuth(spk(key))) ==> inj-event(sendResp(key)) && inj-event(notRevocated(spk(key)))
+RESULT inj-event(successAuth(spk(key))) ==> inj-event(sendResp(key)) && inj-event(notRevocated(spk(key))) is true.
+
+--------------------------------------------------------------
+Verification summary:
+
+Query not attacker(sskPTx[]) is true.
+
+Query not event(successAuth(key)) is true.
+
+Query event(successAuth(spk(key))) ==> event(sendResp(key)) && event(notRevocated(spk(key))) is true.
+
+Query inj-event(successAuth(spk(key))) ==> inj-event(sendResp(key)) && inj-event(notRevocated(spk(key))) is true.
+
+--------------------------------------------------------------
+
