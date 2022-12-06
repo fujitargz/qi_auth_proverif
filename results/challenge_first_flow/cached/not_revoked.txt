@@ -9,7 +9,7 @@ Process 0 (that is, the initial process):
 (
     {8}!
     {9}let cachedDigest: bitstring = hash(productUnitCert) in
-    {10}let revocatedCert: bitstring = dummyCert in
+    {10}let revokedCert: bitstring = dummyCert in
     {11}new nonce: bitstring;
     {12}out(c, (VERSION,CHALLENGE,nonce));
     {13}in(c, (v_chalAuth: version,msg_chalAuth: msgType,hLSB_chalAuth: bitstring,sig: bitstring));
@@ -17,8 +17,8 @@ Process 0 (that is, the initial process):
     {15}if (msg_chalAuth = CHALLENGE_AUTH) then
     {16}if (hLSB_chalAuth = LSB(cachedDigest)) then
     {17}if checksign((cachedDigest,VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig,spkPTx) then
-    {18}if (cachedDigest = hash(revocatedCert)) then
-        {19}event revocated(spkPTx)
+    {18}if (cachedDigest = hash(revokedCert)) then
+        {19}event revoked(spkPTx)
     else
         {20}event successAuth(spkPTx)
 ) | (
@@ -53,9 +53,9 @@ Process 0 (that is, the initial process):
     {9}let cachedDigest: bitstring = hash(productUnitCert) in
     {16}if (hLSB_chalAuth = LSB(cachedDigest)) then
     {17}if checksign((cachedDigest,VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig,spkPTx) then
-    {10}let revocatedCert: bitstring = dummyCert in
-    {18}if (cachedDigest = hash(revocatedCert)) then
-        {19}event revocated(spkPTx)
+    {10}let revokedCert: bitstring = dummyCert in
+    {18}if (cachedDigest = hash(revokedCert)) then
+        {19}event revoked(spkPTx)
     else
         {20}event successAuth(spkPTx)
 ) | (

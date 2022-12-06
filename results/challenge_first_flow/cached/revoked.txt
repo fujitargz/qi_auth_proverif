@@ -16,7 +16,7 @@ Process 0 (that is, the initial process):
     {14}if (hLSB_chalAuth = LSB(cachedDigest)) then
     {15}if checksign((cachedDigest,VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig,spkPTx) then
     {16}if (cachedDigest = hash(productUnitCert)) then
-        {17}event revocated(spkPTx)
+        {17}event revoked(spkPTx)
     else
         {18}event successAuth(spkPTx)
 ) | (
@@ -51,7 +51,7 @@ Process 0 (that is, the initial process):
     {14}if (hLSB_chalAuth = LSB(cachedDigest)) then
     {15}if checksign((cachedDigest,VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig,spkPTx) then
     {16}if (cachedDigest = hash(productUnitCert)) then
-        {17}event revocated(spkPTx)
+        {17}event revoked(spkPTx)
     else
         {18}event successAuth(spkPTx)
 ) | (

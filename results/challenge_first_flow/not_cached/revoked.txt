@@ -23,9 +23,9 @@ Process 0 (that is, the initial process):
     {21}if (msg_cert = CERTIFICATE) then
     {22}if checksign((ID_cert,spk_cert),cert_cert,spkCA) then
     {23}if (hash(cert_cert) = hash(productUnitCert)) then
-        {24}event revocated(spk_cert)
+        {24}event revoked(spk_cert)
     else
-        {25}event notRevocated(spk_cert);
+        {25}event notRevoked(spk_cert);
         {26}if checksign((hash(cert_cert),VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig,spk_cert) then
         {27}event successAuth(spk_cert)
 ) | (
@@ -70,9 +70,9 @@ Process 0 (that is, the initial process):
     {21}if (msg_cert = CERTIFICATE) then
     {22}if checksign((ID_cert,spk_cert),cert_cert,spkCA) then
     {23}if (hash(cert_cert) = hash(productUnitCert)) then
-        {24}event revocated(spk_cert)
+        {24}event revoked(spk_cert)
     else
-        {25}event notRevocated(spk_cert);
+        {25}event notRevoked(spk_cert);
         {26}if checksign((hash(cert_cert),VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig,spk_cert) then
         {27}event successAuth(spk_cert)
 ) | (
@@ -103,16 +103,16 @@ Translating the process into Horn clauses...
 Completing...
 Starting query not event(successAuth(key))
 RESULT not event(successAuth(key)) is true.
--- Query event(successAuth(spk(key))) ==> event(notRevocated(spk(key))) && event(sendResp(key)) in process 1.
+-- Query event(successAuth(spk(key))) ==> event(notRevoked(spk(key))) && event(sendResp(key)) in process 1.
 Translating the process into Horn clauses...
 Completing...
-Starting query event(successAuth(spk(key))) ==> event(notRevocated(spk(key))) && event(sendResp(key))
-RESULT event(successAuth(spk(key))) ==> event(notRevocated(spk(key))) && event(sendResp(key)) is true.
--- Query inj-event(successAuth(spk(key))) ==> inj-event(notRevocated(spk(key))) && inj-event(sendResp(key)) in process 1.
+Starting query event(successAuth(spk(key))) ==> event(notRevoked(spk(key))) && event(sendResp(key))
+RESULT event(successAuth(spk(key))) ==> event(notRevoked(spk(key))) && event(sendResp(key)) is true.
+-- Query inj-event(successAuth(spk(key))) ==> inj-event(notRevoked(spk(key))) && inj-event(sendResp(key)) in process 1.
 Translating the process into Horn clauses...
 Completing...
-Starting query inj-event(successAuth(spk(key))) ==> inj-event(notRevocated(spk(key))) && inj-event(sendResp(key))
-RESULT inj-event(successAuth(spk(key))) ==> inj-event(notRevocated(spk(key))) && inj-event(sendResp(key)) is true.
+Starting query inj-event(successAuth(spk(key))) ==> inj-event(notRevoked(spk(key))) && inj-event(sendResp(key))
+RESULT inj-event(successAuth(spk(key))) ==> inj-event(notRevoked(spk(key))) && inj-event(sendResp(key)) is true.
 
 --------------------------------------------------------------
 Verification summary:
@@ -121,9 +121,9 @@ Query not attacker(sskPTx[]) is true.
 
 Query not event(successAuth(key)) is true.
 
-Query event(successAuth(spk(key))) ==> event(notRevocated(spk(key))) && event(sendResp(key)) is true.
+Query event(successAuth(spk(key))) ==> event(notRevoked(spk(key))) && event(sendResp(key)) is true.
 
-Query inj-event(successAuth(spk(key))) ==> inj-event(notRevocated(spk(key))) && inj-event(sendResp(key)) is true.
+Query inj-event(successAuth(spk(key))) ==> inj-event(notRevoked(spk(key))) && inj-event(sendResp(key)) is true.
 
 --------------------------------------------------------------
 

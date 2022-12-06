@@ -11,7 +11,7 @@ Process 0 (that is, the initial process):
     {9}!
     {10}let cachedDigest: bitstring = dummyCert in
     {11}let cachedKey: spkey = dummyKey in
-    {12}let revocatedCert: bitstring = dummyCert in
+    {12}let revokedCert: bitstring = dummyCert in
     {13}out(c, (VERSION,GET_DIGESTS));
     {14}in(c, (v_dig: version,msg_dig: msgType,digest_dig: bitstring));
     {15}if (v_dig = VERSION) then
@@ -22,10 +22,10 @@ Process 0 (that is, the initial process):
     {20}if (v_cert = VERSION) then
     {21}if (msg_cert = CERTIFICATE) then
     {22}if checksign((ID_cert,spk_cert),cert_cert,spkCA) then
-    {23}if (hash(cert_cert) = hash(revocatedCert)) then
-        {24}event revocated(spk_cert)
+    {23}if (hash(cert_cert) = hash(revokedCert)) then
+        {24}event revoked(spk_cert)
     else
-        {25}event notRevocated(spk_cert);
+        {25}event notRevoked(spk_cert);
         {26}new nonce: bitstring;
         {27}out(c, (VERSION,CHALLENGE,nonce));
         {28}in(c, (v_chalAuth: version,msg_chalAuth: msgType,hLSB_chalAuth: bitstring,sig_chalAuth: bitstring));
@@ -76,11 +76,11 @@ Process 0 (that is, the initial process):
     {20}if (v_cert = VERSION) then
     {21}if (msg_cert = CERTIFICATE) then
     {22}if checksign((ID_cert,spk_cert),cert_cert,spkCA) then
-    {12}let revocatedCert: bitstring = dummyCert in
-    {23}if (hash(cert_cert) = hash(revocatedCert)) then
-        {24}event revocated(spk_cert)
+    {12}let revokedCert: bitstring = dummyCert in
+    {23}if (hash(cert_cert) = hash(revokedCert)) then
+        {24}event revoked(spk_cert)
     else
-        {25}event notRevocated(spk_cert);
+        {25}event notRevoked(spk_cert);
         {26}new nonce: bitstring;
         {27}out(c, (VERSION,CHALLENGE,nonce));
         {28}in(c, (v_chalAuth: version,msg_chalAuth: msgType,hLSB_chalAuth: bitstring,sig_chalAuth: bitstring));
@@ -116,17 +116,17 @@ Translating the process into Horn clauses...
 Completing...
 Starting query not attacker(sskPTx[])
 RESULT not attacker(sskPTx[]) is true.
--- Query event(successAuth(spk(key))) ==> event(sendResp(key)) && event(notRevocated(spk(key))) in process 1.
+-- Query event(successAuth(spk(key))) ==> event(sendResp(key)) && event(notRevoked(spk(key))) in process 1.
 Translating the process into Horn clauses...
 Completing...
-Starting query event(successAuth(spk(key))) ==> event(sendResp(key)) && event(notRevocated(spk(key)))
-goal reachable: begin(sendResp(sskPTx[])) && begin(notRevocated(spk(sskPTx[]))) -> end(successAuth(spk(sskPTx[])))
-RESULT event(successAuth(spk(key))) ==> event(sendResp(key)) && event(notRevocated(spk(key))) is true.
--- Query inj-event(successAuth(spk(key))) ==> inj-event(sendResp(key)) && inj-event(notRevocated(spk(key))) in process 1.
+Starting query event(successAuth(spk(key))) ==> event(sendResp(key)) && event(notRevoked(spk(key)))
+goal reachable: begin(sendResp(sskPTx[])) && begin(notRevoked(spk(sskPTx[]))) -> end(successAuth(spk(sskPTx[])))
+RESULT event(successAuth(spk(key))) ==> event(sendResp(key)) && event(notRevoked(spk(key))) is true.
+-- Query inj-event(successAuth(spk(key))) ==> inj-event(sendResp(key)) && inj-event(notRevoked(spk(key))) in process 1.
 Translating the process into Horn clauses...
 Completing...
-Starting query inj-event(successAuth(spk(key))) ==> inj-event(sendResp(key)) && inj-event(notRevocated(spk(key)))
-goal reachable: begin(sendResp(sskPTx[]),@occ50_1) && begin(@p_act(@occ28_1,(VERSION,CHALLENGE_AUTH,LSB(hash(sign((IDPTx[],spk(sskPTx[])),sskCA[]))),sign((hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])),VERSION,CHALLENGE,nonce_1,VERSION,CHALLENGE_AUTH,LSB(hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])))),sskPTx[])))) && begin(notRevocated(spk(sskPTx[])),@occ25_1) -> end(@occ32_1,successAuth(spk(sskPTx[])))
+Starting query inj-event(successAuth(spk(key))) ==> inj-event(sendResp(key)) && inj-event(notRevoked(spk(key)))
+goal reachable: begin(sendResp(sskPTx[]),@occ50_1) && begin(@p_act(@occ28_1,(VERSION,CHALLENGE_AUTH,LSB(hash(sign((IDPTx[],spk(sskPTx[])),sskCA[]))),sign((hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])),VERSION,CHALLENGE,nonce_1,VERSION,CHALLENGE_AUTH,LSB(hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])))),sskPTx[])))) && begin(notRevoked(spk(sskPTx[])),@occ25_1) -> end(@occ32_1,successAuth(spk(sskPTx[])))
 The 1st, 2nd, 3rd hypotheses occur strictly before the conclusion.
 Abbreviations:
 nonce_1 = nonce[cert_cert = sign((IDPTx[],spk(sskPTx[])),sskCA[]),spk_cert = spk(sskPTx[]),ID_cert = IDPTx[],msg_cert = CERTIFICATE,v_cert = VERSION,digest_dig = hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])),msg_dig = DIGESTS,v_dig = VERSION,!1 = @sid]
@@ -134,16 +134,16 @@ nonce_1 = nonce[cert_cert = sign((IDPTx[],spk(sskPTx[])),sskCA[]),spk_cert = spk
 @occ50_1 = @occ50[nonce_chal = nonce_1,msg_chal = CHALLENGE,v_chal = VERSION,msg_getCert = GET_CERTIFICATE,v_getCert = VERSION,msg_getDig = GET_DIGESTS,v_getDig = VERSION,!1 = @sid_1]
 @occ28_1 = @occ28[!1 = @sid]
 @occ25_1 = @occ25[cert_cert = sign((IDPTx[],spk(sskPTx[])),sskCA[]),spk_cert = spk(sskPTx[]),ID_cert = IDPTx[],msg_cert = CERTIFICATE,v_cert = VERSION,digest_dig = hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])),msg_dig = DIGESTS,v_dig = VERSION,!1 = @sid]
-RESULT inj-event(successAuth(spk(key))) ==> inj-event(sendResp(key)) && inj-event(notRevocated(spk(key))) is true.
+RESULT inj-event(successAuth(spk(key))) ==> inj-event(sendResp(key)) && inj-event(notRevoked(spk(key))) is true.
 
 --------------------------------------------------------------
 Verification summary:
 
 Query not attacker(sskPTx[]) is true.
 
-Query event(successAuth(spk(key))) ==> event(sendResp(key)) && event(notRevocated(spk(key))) is true.
+Query event(successAuth(spk(key))) ==> event(sendResp(key)) && event(notRevoked(spk(key))) is true.
 
-Query inj-event(successAuth(spk(key))) ==> inj-event(sendResp(key)) && inj-event(notRevocated(spk(key))) is true.
+Query inj-event(successAuth(spk(key))) ==> inj-event(sendResp(key)) && inj-event(notRevoked(spk(key))) is true.
 
 --------------------------------------------------------------
 
