@@ -17,21 +17,21 @@ Process 0 (that is, the initial process):
     {15}if (msg_dig = DIGESTS) then
     {16}if (digest_dig ≠ cachedDigest) then
     {17}out(c, (VERSION,GET_CERTIFICATE));
-    {18}in(c, (v_cert: version,msg_cert: msgType,ID_cert: ID,spk_cert: spkey,cert_cert: bitstring));
+    {18}in(c, (v_cert: version,msg_cert: msgType,ID': ID,spk': spkey,cert': bitstring));
     {19}if (v_cert = VERSION) then
     {20}if (msg_cert = CERTIFICATE) then
-    {21}if checksign((ID_cert,spk_cert),cert_cert,spkCA) then
-    {22}if (hash(cert_cert) = hash(productUnitCert)) then
-        {23}event revoked(spk_cert)
+    {21}if checksign((ID',spk'),cert',spkCA) then
+    {22}if (hash(cert') = hash(productUnitCert)) then
+        {23}event revoked(spk')
     else
-        {24}event notRevoked(spk_cert);
+        {24}event notRevoked(spk');
         {25}new nonce: bitstring;
         {26}out(c, (VERSION,CHALLENGE,nonce));
         {27}in(c, (v_chalAuth: version,msg_chalAuth: msgType,hLSB_chalAuth: bitstring,sig_chalAuth: bitstring));
         {28}if (v_chalAuth = VERSION) then
         {29}if (msg_chalAuth = CHALLENGE_AUTH) then
-        {30}if checksign((digest_dig,VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig_chalAuth,spk_cert) then
-        {31}event successAuth(spk_cert)
+        {30}if checksign((digest_dig,VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig_chalAuth,spk') then
+        {31}event successAuth(spk')
 ) | (
     {32}!
     {33}let IDPTx_1: ID = IDPTx in
@@ -72,21 +72,21 @@ Process 0 (that is, the initial process):
     {10}let cachedDigest: bitstring = dummyCert in
     {16}if (digest_dig ≠ cachedDigest) then
     {17}out(c, (VERSION,GET_CERTIFICATE));
-    {18}in(c, (v_cert: version,msg_cert: msgType,ID_cert: ID,spk_cert: spkey,cert_cert: bitstring));
+    {18}in(c, (v_cert: version,msg_cert: msgType,ID': ID,spk': spkey,cert': bitstring));
     {19}if (v_cert = VERSION) then
     {20}if (msg_cert = CERTIFICATE) then
-    {21}if checksign((ID_cert,spk_cert),cert_cert,spkCA) then
-    {22}if (hash(cert_cert) = hash(productUnitCert)) then
-        {23}event revoked(spk_cert)
+    {21}if checksign((ID',spk'),cert',spkCA) then
+    {22}if (hash(cert') = hash(productUnitCert)) then
+        {23}event revoked(spk')
     else
-        {24}event notRevoked(spk_cert);
+        {24}event notRevoked(spk');
         {25}new nonce: bitstring;
         {26}out(c, (VERSION,CHALLENGE,nonce));
         {27}in(c, (v_chalAuth: version,msg_chalAuth: msgType,hLSB_chalAuth: bitstring,sig_chalAuth: bitstring));
         {28}if (v_chalAuth = VERSION) then
         {29}if (msg_chalAuth = CHALLENGE_AUTH) then
-        {30}if checksign((digest_dig,VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig_chalAuth,spk_cert) then
-        {31}event successAuth(spk_cert)
+        {30}if checksign((digest_dig,VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig_chalAuth,spk') then
+        {31}event successAuth(spk')
 ) | (
     {32}!
     {35}in(c, (v_getDig: version,msg_getDig: msgType));

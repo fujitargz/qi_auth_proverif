@@ -18,16 +18,16 @@ Process 0 (that is, the initial process):
     {16}if (msg_chalAuth = CHALLENGE_AUTH) then
     {17}if (hLSB_chalAuth ≠ LSB(cachedDigest)) then
     {18}out(c, (VERSION,GET_CERTIFICATE));
-    {19}in(c, (v_cert: version,msg_cert: msgType,ID_cert: ID,spk_cert: spkey,cert_cert: bitstring));
+    {19}in(c, (v_cert: version,msg_cert: msgType,ID': ID,spk': spkey,cert': bitstring));
     {20}if (v_cert = VERSION) then
     {21}if (msg_cert = CERTIFICATE) then
-    {22}if checksign((ID_cert,spk_cert),cert_cert,spkCA) then
-    {23}if (hash(cert_cert) = hash(productUnitCert)) then
-        {24}event revoked(spk_cert)
+    {22}if checksign((ID',spk'),cert',spkCA) then
+    {23}if (hash(cert') = hash(productUnitCert)) then
+        {24}event revoked(spk')
     else
-        {25}event notRevoked(spk_cert);
-        {26}if checksign((hash(cert_cert),VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig,spk_cert) then
-        {27}event successAuth(spk_cert)
+        {25}event notRevoked(spk');
+        {26}if checksign((hash(cert'),VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig,spk') then
+        {27}event successAuth(spk')
 ) | (
     {28}!
     {29}let IDPTx_1: ID = IDPTx in
@@ -65,16 +65,16 @@ Process 0 (that is, the initial process):
     {10}let cachedDigest: bitstring = dummyCert in
     {17}if (hLSB_chalAuth ≠ LSB(cachedDigest)) then
     {18}out(c, (VERSION,GET_CERTIFICATE));
-    {19}in(c, (v_cert: version,msg_cert: msgType,ID_cert: ID,spk_cert: spkey,cert_cert: bitstring));
+    {19}in(c, (v_cert: version,msg_cert: msgType,ID': ID,spk': spkey,cert': bitstring));
     {20}if (v_cert = VERSION) then
     {21}if (msg_cert = CERTIFICATE) then
-    {22}if checksign((ID_cert,spk_cert),cert_cert,spkCA) then
-    {23}if (hash(cert_cert) = hash(productUnitCert)) then
-        {24}event revoked(spk_cert)
+    {22}if checksign((ID',spk'),cert',spkCA) then
+    {23}if (hash(cert') = hash(productUnitCert)) then
+        {24}event revoked(spk')
     else
-        {25}event notRevoked(spk_cert);
-        {26}if checksign((hash(cert_cert),VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig,spk_cert) then
-        {27}event successAuth(spk_cert)
+        {25}event notRevoked(spk');
+        {26}if checksign((hash(cert'),VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig,spk') then
+        {27}event successAuth(spk')
 ) | (
     {28}!
     {31}in(c, (v_chal: version,msg_chal: msgType,nonce_chal: bitstring));

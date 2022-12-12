@@ -19,16 +19,16 @@ Process 0 (that is, the initial process):
     {17}if (msg_chalAuth = CHALLENGE_AUTH) then
     {18}if (hLSB_chalAuth ≠ LSB(cachedDigest)) then
     {19}out(c, (VERSION,GET_CERTIFICATE));
-    {20}in(c, (v_cert: version,msg_cert: msgType,ID_cert: ID,spk_cert: spkey,cert_cert: bitstring));
+    {20}in(c, (v_cert: version,msg_cert: msgType,ID': ID,spk': spkey,cert': bitstring));
     {21}if (v_cert = VERSION) then
     {22}if (msg_cert = CERTIFICATE) then
-    {23}if checksign((ID_cert,spk_cert),cert_cert,spkCA) then
-    {24}if (hash(cert_cert) = hash(revokedCert)) then
-        {25}event revoked(spk_cert)
+    {23}if checksign((ID',spk'),cert',spkCA) then
+    {24}if (hash(cert') = hash(revokedCert)) then
+        {25}event revoked(spk')
     else
-        {26}event notRevoked(spk_cert);
-        {27}if checksign((hash(cert_cert),VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig,spk_cert) then
-        {28}event successAuth(spk_cert)
+        {26}event notRevoked(spk');
+        {27}if checksign((hash(cert'),VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig,spk') then
+        {28}event successAuth(spk')
 ) | (
     {29}!
     {30}let IDPTx_1: ID = IDPTx in
@@ -65,17 +65,17 @@ Process 0 (that is, the initial process):
     {10}let cachedDigest: bitstring = dummyCert in
     {18}if (hLSB_chalAuth ≠ LSB(cachedDigest)) then
     {19}out(c, (VERSION,GET_CERTIFICATE));
-    {20}in(c, (v_cert: version,msg_cert: msgType,ID_cert: ID,spk_cert: spkey,cert_cert: bitstring));
+    {20}in(c, (v_cert: version,msg_cert: msgType,ID': ID,spk': spkey,cert': bitstring));
     {21}if (v_cert = VERSION) then
     {22}if (msg_cert = CERTIFICATE) then
-    {23}if checksign((ID_cert,spk_cert),cert_cert,spkCA) then
+    {23}if checksign((ID',spk'),cert',spkCA) then
     {12}let revokedCert: bitstring = dummyCert in
-    {24}if (hash(cert_cert) = hash(revokedCert)) then
-        {25}event revoked(spk_cert)
+    {24}if (hash(cert') = hash(revokedCert)) then
+        {25}event revoked(spk')
     else
-        {26}event notRevoked(spk_cert);
-        {27}if checksign((hash(cert_cert),VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig,spk_cert) then
-        {28}event successAuth(spk_cert)
+        {26}event notRevoked(spk');
+        {27}if checksign((hash(cert'),VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig,spk') then
+        {28}event successAuth(spk')
 ) | (
     {29}!
     {32}in(c, (v_chal: version,msg_chal: msgType,nonce_chal: bitstring));
@@ -115,8 +115,8 @@ The 1st, 2nd, 3rd, 5th hypotheses occur strictly before the conclusion.
 The 4th hypothesis occurs before the conclusion.
 Abbreviations:
 nonce_1 = nonce[!1 = @sid]
-@occ28_1 = @occ28[cert_cert = sign((IDPTx[],spk(sskPTx[])),sskCA[]),spk_cert = spk(sskPTx[]),ID_cert = IDPTx[],msg_cert = CERTIFICATE,v_cert = VERSION,sig = sign((hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])),VERSION,CHALLENGE,nonce_1,VERSION,CHALLENGE_AUTH,LSB(hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])))),sskPTx[]),hLSB_chalAuth = LSB(hash(sign((IDPTx[],spk(sskPTx[])),sskCA[]))),msg_chalAuth = CHALLENGE_AUTH,v_chalAuth = VERSION,!1 = @sid]
-@occ26_1 = @occ26[cert_cert = sign((IDPTx[],spk(sskPTx[])),sskCA[]),spk_cert = spk(sskPTx[]),ID_cert = IDPTx[],msg_cert = CERTIFICATE,v_cert = VERSION,sig = sign((hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])),VERSION,CHALLENGE,nonce_1,VERSION,CHALLENGE_AUTH,LSB(hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])))),sskPTx[]),hLSB_chalAuth = LSB(hash(sign((IDPTx[],spk(sskPTx[])),sskCA[]))),msg_chalAuth = CHALLENGE_AUTH,v_chalAuth = VERSION,!1 = @sid]
+@occ28_1 = @occ28[cert' = sign((IDPTx[],spk(sskPTx[])),sskCA[]),spk' = spk(sskPTx[]),ID' = IDPTx[],msg_cert = CERTIFICATE,v_cert = VERSION,sig = sign((hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])),VERSION,CHALLENGE,nonce_1,VERSION,CHALLENGE_AUTH,LSB(hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])))),sskPTx[]),hLSB_chalAuth = LSB(hash(sign((IDPTx[],spk(sskPTx[])),sskCA[]))),msg_chalAuth = CHALLENGE_AUTH,v_chalAuth = VERSION,!1 = @sid]
+@occ26_1 = @occ26[cert' = sign((IDPTx[],spk(sskPTx[])),sskCA[]),spk' = spk(sskPTx[]),ID' = IDPTx[],msg_cert = CERTIFICATE,v_cert = VERSION,sig = sign((hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])),VERSION,CHALLENGE,nonce_1,VERSION,CHALLENGE_AUTH,LSB(hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])))),sskPTx[]),hLSB_chalAuth = LSB(hash(sign((IDPTx[],spk(sskPTx[])),sskCA[]))),msg_chalAuth = CHALLENGE_AUTH,v_chalAuth = VERSION,!1 = @sid]
 @occ40_1 = @occ40[!1 = @sid_1]
 @occ38_1 = @occ38[nonce_chal = nonce_chal_1,msg_chal = CHALLENGE,v_chal = VERSION,!1 = @sid_1]
 @occ38_2 = @occ38[nonce_chal = nonce_1,msg_chal = CHALLENGE,v_chal = VERSION,!1 = @sid_2]

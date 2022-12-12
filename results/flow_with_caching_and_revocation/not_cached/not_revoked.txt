@@ -18,21 +18,21 @@ Process 0 (that is, the initial process):
     {16}if (msg_dig = DIGESTS) then
     {17}if (digest_dig ≠ cachedDigest) then
     {18}out(c, (VERSION,GET_CERTIFICATE));
-    {19}in(c, (v_cert: version,msg_cert: msgType,ID_cert: ID,spk_cert: spkey,cert_cert: bitstring));
+    {19}in(c, (v_cert: version,msg_cert: msgType,ID': ID,spk': spkey,cert': bitstring));
     {20}if (v_cert = VERSION) then
     {21}if (msg_cert = CERTIFICATE) then
-    {22}if checksign((ID_cert,spk_cert),cert_cert,spkCA) then
-    {23}if (hash(cert_cert) = hash(revokedCert)) then
-        {24}event revoked(spk_cert)
+    {22}if checksign((ID',spk'),cert',spkCA) then
+    {23}if (hash(cert') = hash(revokedCert)) then
+        {24}event revoked(spk')
     else
-        {25}event notRevoked(spk_cert);
+        {25}event notRevoked(spk');
         {26}new nonce: bitstring;
         {27}out(c, (VERSION,CHALLENGE,nonce));
         {28}in(c, (v_chalAuth: version,msg_chalAuth: msgType,hLSB_chalAuth: bitstring,sig_chalAuth: bitstring));
         {29}if (v_chalAuth = VERSION) then
         {30}if (msg_chalAuth = CHALLENGE_AUTH) then
-        {31}if checksign((digest_dig,VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig_chalAuth,spk_cert) then
-        {32}event successAuth(spk_cert)
+        {31}if checksign((digest_dig,VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig_chalAuth,spk') then
+        {32}event successAuth(spk')
 ) | (
     {33}!
     {34}let IDPTx_1: ID = IDPTx in
@@ -72,22 +72,22 @@ Process 0 (that is, the initial process):
     {10}let cachedDigest: bitstring = dummyCert in
     {17}if (digest_dig ≠ cachedDigest) then
     {18}out(c, (VERSION,GET_CERTIFICATE));
-    {19}in(c, (v_cert: version,msg_cert: msgType,ID_cert: ID,spk_cert: spkey,cert_cert: bitstring));
+    {19}in(c, (v_cert: version,msg_cert: msgType,ID': ID,spk': spkey,cert': bitstring));
     {20}if (v_cert = VERSION) then
     {21}if (msg_cert = CERTIFICATE) then
-    {22}if checksign((ID_cert,spk_cert),cert_cert,spkCA) then
+    {22}if checksign((ID',spk'),cert',spkCA) then
     {12}let revokedCert: bitstring = dummyCert in
-    {23}if (hash(cert_cert) = hash(revokedCert)) then
-        {24}event revoked(spk_cert)
+    {23}if (hash(cert') = hash(revokedCert)) then
+        {24}event revoked(spk')
     else
-        {25}event notRevoked(spk_cert);
+        {25}event notRevoked(spk');
         {26}new nonce: bitstring;
         {27}out(c, (VERSION,CHALLENGE,nonce));
         {28}in(c, (v_chalAuth: version,msg_chalAuth: msgType,hLSB_chalAuth: bitstring,sig_chalAuth: bitstring));
         {29}if (v_chalAuth = VERSION) then
         {30}if (msg_chalAuth = CHALLENGE_AUTH) then
-        {31}if checksign((digest_dig,VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig_chalAuth,spk_cert) then
-        {32}event successAuth(spk_cert)
+        {31}if checksign((digest_dig,VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig_chalAuth,spk') then
+        {32}event successAuth(spk')
 ) | (
     {33}!
     {36}in(c, (v_getDig: version,msg_getDig: msgType));
@@ -129,11 +129,11 @@ Starting query inj-event(successAuth(spk(key))) ==> inj-event(sendResp(key)) && 
 goal reachable: begin(sendResp(sskPTx[]),@occ50_1) && begin(@p_act(@occ28_1,(VERSION,CHALLENGE_AUTH,LSB(hash(sign((IDPTx[],spk(sskPTx[])),sskCA[]))),sign((hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])),VERSION,CHALLENGE,nonce_1,VERSION,CHALLENGE_AUTH,LSB(hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])))),sskPTx[])))) && begin(notRevoked(spk(sskPTx[])),@occ25_1) -> end(@occ32_1,successAuth(spk(sskPTx[])))
 The 1st, 2nd, 3rd hypotheses occur strictly before the conclusion.
 Abbreviations:
-nonce_1 = nonce[cert_cert = sign((IDPTx[],spk(sskPTx[])),sskCA[]),spk_cert = spk(sskPTx[]),ID_cert = IDPTx[],msg_cert = CERTIFICATE,v_cert = VERSION,digest_dig = hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])),msg_dig = DIGESTS,v_dig = VERSION,!1 = @sid]
-@occ32_1 = @occ32[sig_chalAuth = sign((hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])),VERSION,CHALLENGE,nonce_1,VERSION,CHALLENGE_AUTH,LSB(hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])))),sskPTx[]),hLSB_chalAuth = LSB(hash(sign((IDPTx[],spk(sskPTx[])),sskCA[]))),msg_chalAuth = CHALLENGE_AUTH,v_chalAuth = VERSION,cert_cert = sign((IDPTx[],spk(sskPTx[])),sskCA[]),spk_cert = spk(sskPTx[]),ID_cert = IDPTx[],msg_cert = CERTIFICATE,v_cert = VERSION,digest_dig = hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])),msg_dig = DIGESTS,v_dig = VERSION,!1 = @sid]
+nonce_1 = nonce[cert' = sign((IDPTx[],spk(sskPTx[])),sskCA[]),spk' = spk(sskPTx[]),ID' = IDPTx[],msg_cert = CERTIFICATE,v_cert = VERSION,digest_dig = hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])),msg_dig = DIGESTS,v_dig = VERSION,!1 = @sid]
+@occ32_1 = @occ32[sig_chalAuth = sign((hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])),VERSION,CHALLENGE,nonce_1,VERSION,CHALLENGE_AUTH,LSB(hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])))),sskPTx[]),hLSB_chalAuth = LSB(hash(sign((IDPTx[],spk(sskPTx[])),sskCA[]))),msg_chalAuth = CHALLENGE_AUTH,v_chalAuth = VERSION,cert' = sign((IDPTx[],spk(sskPTx[])),sskCA[]),spk' = spk(sskPTx[]),ID' = IDPTx[],msg_cert = CERTIFICATE,v_cert = VERSION,digest_dig = hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])),msg_dig = DIGESTS,v_dig = VERSION,!1 = @sid]
 @occ50_1 = @occ50[nonce_chal = nonce_1,msg_chal = CHALLENGE,v_chal = VERSION,msg_getCert = GET_CERTIFICATE,v_getCert = VERSION,msg_getDig = GET_DIGESTS,v_getDig = VERSION,!1 = @sid_1]
 @occ28_1 = @occ28[!1 = @sid]
-@occ25_1 = @occ25[cert_cert = sign((IDPTx[],spk(sskPTx[])),sskCA[]),spk_cert = spk(sskPTx[]),ID_cert = IDPTx[],msg_cert = CERTIFICATE,v_cert = VERSION,digest_dig = hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])),msg_dig = DIGESTS,v_dig = VERSION,!1 = @sid]
+@occ25_1 = @occ25[cert' = sign((IDPTx[],spk(sskPTx[])),sskCA[]),spk' = spk(sskPTx[]),ID' = IDPTx[],msg_cert = CERTIFICATE,v_cert = VERSION,digest_dig = hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])),msg_dig = DIGESTS,v_dig = VERSION,!1 = @sid]
 RESULT inj-event(successAuth(spk(key))) ==> inj-event(sendResp(key)) && inj-event(notRevoked(spk(key))) is true.
 
 --------------------------------------------------------------

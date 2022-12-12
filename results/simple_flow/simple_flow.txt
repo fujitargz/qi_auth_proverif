@@ -8,17 +8,17 @@ Process 0 (that is, the initial process):
 (
     {7}!
     {8}out(c, (VERSION,GET_CERTIFICATE));
-    {9}in(c, (v_cert: version,msg_cert: msgType,ID_cert: ID,spk_cert: spkey,cert_cert: bitstring));
+    {9}in(c, (v_cert: version,msg_cert: msgType,ID': ID,spk': spkey,cert': bitstring));
     {10}if (v_cert = VERSION) then
     {11}if (msg_cert = CERTIFICATE) then
-    {12}if checksign((ID_cert,spk_cert),cert_cert,spkCA) then
+    {12}if checksign((ID',spk'),cert',spkCA) then
     {13}new nonce: bitstring;
     {14}out(c, (VERSION,CHALLENGE,nonce));
     {15}in(c, (v_chalAuth: version,msg_chalAuth: msgType,hLSB_chalAuth: bitstring,sig_chalAuth: bitstring));
     {16}if (v_chalAuth = VERSION) then
     {17}if (msg_chalAuth = CHALLENGE_AUTH) then
-    {18}if checksign((hash(cert_cert),VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig_chalAuth,spk_cert) then
-    {19}event successAuth(ID_cert,spk_cert)
+    {18}if checksign((hash(cert'),VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig_chalAuth,spk') then
+    {19}event successAuth(ID',spk')
 ) | (
     {20}!
     {21}let IDPTx_1: ID = IDPTx in
@@ -46,17 +46,17 @@ Process 0 (that is, the initial process):
 (
     {7}!
     {8}out(c, (VERSION,GET_CERTIFICATE));
-    {9}in(c, (v_cert: version,msg_cert: msgType,ID_cert: ID,spk_cert: spkey,cert_cert: bitstring));
+    {9}in(c, (v_cert: version,msg_cert: msgType,ID': ID,spk': spkey,cert': bitstring));
     {10}if (v_cert = VERSION) then
     {11}if (msg_cert = CERTIFICATE) then
-    {12}if checksign((ID_cert,spk_cert),cert_cert,spkCA) then
+    {12}if checksign((ID',spk'),cert',spkCA) then
     {13}new nonce: bitstring;
     {14}out(c, (VERSION,CHALLENGE,nonce));
     {15}in(c, (v_chalAuth: version,msg_chalAuth: msgType,hLSB_chalAuth: bitstring,sig_chalAuth: bitstring));
     {16}if (v_chalAuth = VERSION) then
     {17}if (msg_chalAuth = CHALLENGE_AUTH) then
-    {18}if checksign((hash(cert_cert),VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig_chalAuth,spk_cert) then
-    {19}event successAuth(ID_cert,spk_cert)
+    {18}if checksign((hash(cert'),VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig_chalAuth,spk') then
+    {19}event successAuth(ID',spk')
 ) | (
     {20}!
     {23}in(c, (v_getCert: version,msg_getCert: msgType));
@@ -94,8 +94,8 @@ Starting query inj-event(successAuth(id,spk(key))) ==> inj-event(sendResp(id,key
 goal reachable: begin(sendResp(IDPTx[],sskPTx[]),@occ33_1) -> end(@occ19_1,successAuth(IDPTx[],spk(sskPTx[])))
 The hypothesis occurs strictly before the conclusion.
 Abbreviations:
-nonce_1 = nonce[cert_cert = sign((IDPTx[],spk(sskPTx[])),sskCA[]),spk_cert = spk(sskPTx[]),ID_cert = IDPTx[],msg_cert = CERTIFICATE,v_cert = VERSION,!1 = @sid]
-@occ19_1 = @occ19[sig_chalAuth = sign((hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])),VERSION,CHALLENGE,nonce_1,VERSION,CHALLENGE_AUTH,LSB(hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])))),sskPTx[]),hLSB_chalAuth = LSB(hash(sign((IDPTx[],spk(sskPTx[])),sskCA[]))),msg_chalAuth = CHALLENGE_AUTH,v_chalAuth = VERSION,cert_cert = sign((IDPTx[],spk(sskPTx[])),sskCA[]),spk_cert = spk(sskPTx[]),ID_cert = IDPTx[],msg_cert = CERTIFICATE,v_cert = VERSION,!1 = @sid]
+nonce_1 = nonce[cert' = sign((IDPTx[],spk(sskPTx[])),sskCA[]),spk' = spk(sskPTx[]),ID' = IDPTx[],msg_cert = CERTIFICATE,v_cert = VERSION,!1 = @sid]
+@occ19_1 = @occ19[sig_chalAuth = sign((hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])),VERSION,CHALLENGE,nonce_1,VERSION,CHALLENGE_AUTH,LSB(hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])))),sskPTx[]),hLSB_chalAuth = LSB(hash(sign((IDPTx[],spk(sskPTx[])),sskCA[]))),msg_chalAuth = CHALLENGE_AUTH,v_chalAuth = VERSION,cert' = sign((IDPTx[],spk(sskPTx[])),sskCA[]),spk' = spk(sskPTx[]),ID' = IDPTx[],msg_cert = CERTIFICATE,v_cert = VERSION,!1 = @sid]
 @occ33_1 = @occ33[nonce_chal = nonce_1,msg_chal = CHALLENGE,v_chal = VERSION,msg_getCert = GET_CERTIFICATE,v_getCert = VERSION,!1 = @sid_1]
 RESULT inj-event(successAuth(id,spk(key))) ==> inj-event(sendResp(id,key)) is true.
 

@@ -17,17 +17,17 @@ Process 0 (that is, the initial process):
     {15}if (msg_dig = DIGESTS) then
     {16}if (digest_dig ≠ cachedDigest) then
     {17}out(c, (VERSION,GET_CERTIFICATE));
-    {18}in(c, (v_cert: version,msg_cert: msgType,ID_cert: ID,spk_cert: spkey,cert_cert: bitstring));
+    {18}in(c, (v_cert: version,msg_cert: msgType,ID': ID,spk': spkey,cert': bitstring));
     {19}if (v_cert = VERSION) then
     {20}if (msg_cert = CERTIFICATE) then
-    {21}if checksign((ID_cert,spk_cert),cert_cert,spkCA) then
+    {21}if checksign((ID',spk'),cert',spkCA) then
     {22}new nonce: bitstring;
     {23}out(c, (VERSION,CHALLENGE,nonce));
     {24}in(c, (v_chalAuth: version,msg_chalAuth: msgType,hLSB_chalAuth: bitstring,sig_chalAuth: bitstring));
     {25}if (v_chalAuth = VERSION) then
     {26}if (msg_chalAuth = CHALLENGE_AUTH) then
-    {27}if checksign((hash(cert_cert),VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig_chalAuth,spk_cert) then
-    {28}event successAuth(spk_cert)
+    {27}if checksign((hash(cert'),VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig_chalAuth,spk') then
+    {28}event successAuth(spk')
 ) | (
     {29}!
     {30}let IDPTx_1: ID = IDPTx in
@@ -67,17 +67,17 @@ Process 0 (that is, the initial process):
     {10}let cachedDigest: bitstring = dummyCert in
     {16}if (digest_dig ≠ cachedDigest) then
     {17}out(c, (VERSION,GET_CERTIFICATE));
-    {18}in(c, (v_cert: version,msg_cert: msgType,ID_cert: ID,spk_cert: spkey,cert_cert: bitstring));
+    {18}in(c, (v_cert: version,msg_cert: msgType,ID': ID,spk': spkey,cert': bitstring));
     {19}if (v_cert = VERSION) then
     {20}if (msg_cert = CERTIFICATE) then
-    {21}if checksign((ID_cert,spk_cert),cert_cert,spkCA) then
+    {21}if checksign((ID',spk'),cert',spkCA) then
     {22}new nonce: bitstring;
     {23}out(c, (VERSION,CHALLENGE,nonce));
     {24}in(c, (v_chalAuth: version,msg_chalAuth: msgType,hLSB_chalAuth: bitstring,sig_chalAuth: bitstring));
     {25}if (v_chalAuth = VERSION) then
     {26}if (msg_chalAuth = CHALLENGE_AUTH) then
-    {27}if checksign((hash(cert_cert),VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig_chalAuth,spk_cert) then
-    {28}event successAuth(spk_cert)
+    {27}if checksign((hash(cert'),VERSION,CHALLENGE,nonce,v_chalAuth,msg_chalAuth,hLSB_chalAuth),sig_chalAuth,spk') then
+    {28}event successAuth(spk')
 ) | (
     {29}!
     {32}in(c, (v_getDig: version,msg_getDig: msgType));
@@ -120,8 +120,8 @@ goal reachable: digest_dig_1 ≠ dummyCert[] && begin(sendResp(sskPTx[]),@occ46_
 The 1st hypothesis occurs strictly before the conclusion.
 The 2nd hypothesis occurs before the conclusion.
 Abbreviations:
-nonce_1 = nonce[cert_cert = sign((IDPTx[],spk(sskPTx[])),sskCA[]),spk_cert = spk(sskPTx[]),ID_cert = IDPTx[],msg_cert = CERTIFICATE,v_cert = VERSION,digest_dig = digest_dig_1,msg_dig = DIGESTS,v_dig = VERSION,!1 = @sid]
-@occ28_1 = @occ28[sig_chalAuth = sign((hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])),VERSION,CHALLENGE,nonce_1,VERSION,CHALLENGE_AUTH,LSB(hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])))),sskPTx[]),hLSB_chalAuth = LSB(hash(sign((IDPTx[],spk(sskPTx[])),sskCA[]))),msg_chalAuth = CHALLENGE_AUTH,v_chalAuth = VERSION,cert_cert = sign((IDPTx[],spk(sskPTx[])),sskCA[]),spk_cert = spk(sskPTx[]),ID_cert = IDPTx[],msg_cert = CERTIFICATE,v_cert = VERSION,digest_dig = digest_dig_1,msg_dig = DIGESTS,v_dig = VERSION,!1 = @sid]
+nonce_1 = nonce[cert' = sign((IDPTx[],spk(sskPTx[])),sskCA[]),spk' = spk(sskPTx[]),ID' = IDPTx[],msg_cert = CERTIFICATE,v_cert = VERSION,digest_dig = digest_dig_1,msg_dig = DIGESTS,v_dig = VERSION,!1 = @sid]
+@occ28_1 = @occ28[sig_chalAuth = sign((hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])),VERSION,CHALLENGE,nonce_1,VERSION,CHALLENGE_AUTH,LSB(hash(sign((IDPTx[],spk(sskPTx[])),sskCA[])))),sskPTx[]),hLSB_chalAuth = LSB(hash(sign((IDPTx[],spk(sskPTx[])),sskCA[]))),msg_chalAuth = CHALLENGE_AUTH,v_chalAuth = VERSION,cert' = sign((IDPTx[],spk(sskPTx[])),sskCA[]),spk' = spk(sskPTx[]),ID' = IDPTx[],msg_cert = CERTIFICATE,v_cert = VERSION,digest_dig = digest_dig_1,msg_dig = DIGESTS,v_dig = VERSION,!1 = @sid]
 @occ46_1 = @occ46[nonce_chal = nonce_1,msg_chal = CHALLENGE,v_chal = VERSION,msg_getCert = GET_CERTIFICATE,v_getCert = VERSION,msg_getDig = GET_DIGESTS,v_getDig = VERSION,!1 = @sid_1]
 RESULT inj-event(successAuth(spk(key))) ==> inj-event(sendResp(key)) is true.
 
